@@ -3,6 +3,10 @@
 <html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
 <body>
 	<wicket:panel>
+		<wicket:message key="console.maintenance.queuemanager.actions.emptyCache.warning" />
+		<button wicket:id="emptyCache" class="btn btn-danger btn-xs">
+			<wicket:message key="console.maintenance.queuemanager.actions.emptyCache" />
+		</button>
 		<div wicket:id="nodes" class="row">
 			<div class="col-md-12">
 				<div wicket:id="node" class="panel panel-default" />

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Functions;
 
+import fr.openwide.core.commons.util.functional.Predicates2;
 import fr.openwide.core.infinispan.model.INode;
 import fr.openwide.core.infinispan.service.IInfinispanClusterService;
 import fr.openwide.core.jpa.more.business.sort.ISort;
@@ -61,6 +62,8 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 
 	private final IModel<List<INode>> nodesModel;
 
+	private final IModel<Boolean> queueTaskManagerStatusModel;
+
 	public ConsoleMaintenanceQueueManagerNodePanel(String id) {
 		super(id);
 		setOutputMarkupId(true);
@@ -72,6 +75,26 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 				return infinispanClusterService.getAllNodes();
 			}
 		};
+		
+		queueTaskManagerStatusModel = new LoadableDetachableModel<Boolean>() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			protected Boolean load() {
+				return infinispanQueueTaskManagerService.isOneQueueTaskManagerUp(nodesModel.getObject());
+			}
+		};
+		
+		add(
+				new AjaxLink<Void>("emptyCache") {
+					private static final long serialVersionUID = 1L;
+					
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						// TODO Auto-generated method stub
+					}
+					
+				}.add(Condition.predicate(queueTaskManagerStatusModel, Predicates2.isTrue()).thenDisable())
+		);
 
 		add(
 				new CollectionView<INode>("nodes", nodesModel, Models.<INode>serializableModelFactory()) {
@@ -225,7 +248,7 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 								} else {
 									Session.get().error(String.format("Erreur lors du démarrage du QueueTaskManager (%s)", result));
 								}
-								target.add(nodeFragment);
+								target.add(ConsoleMaintenanceQueueManagerNodePanel.this);
 							} catch (Exception e) {
 								LOGGER.error("Erreur lors du démarrage du QueueTaskManager", e);
 								Session.get().error(getString("common.error.unexpected"));
@@ -248,7 +271,7 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 								} else {
 									Session.get().error(String.format("Erreur lors de l'arrêt du QueueTaskManager (%s)", result));
 								}
-								target.add(nodeFragment);
+								target.add(ConsoleMaintenanceQueueManagerNodePanel.this);
 							} catch (Exception e) {
 								LOGGER.error("Erreur lors de l'arrêt du QueueTaskManager", e);
 								Session.get().error(getString("common.error.unexpected"));
@@ -326,6 +349,7 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 	protected void onDetach() {
 		super.onDetach();
 		Detachables.detach(nodesModel);
+		Detachables.detach(queueTaskManagerStatusModel);
 	}
 
 }
