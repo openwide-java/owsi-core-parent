@@ -73,7 +73,7 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 			private static final long serialVersionUID = 1L;
 			@Override
 			protected List<INode> load() {
-				return infinispanClusterService.getAllNodes();
+				return infinispanClusterService.getNodes();
 			}
 		};
 		
