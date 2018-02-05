@@ -141,4 +141,8 @@ public class InfinispanQueueTaskManagerServiceImpl implements IInfinispanQueueTa
 				.filter(o-> o!=null)
 				.anyMatch(o->o.isQueueManagerActive());
 	}
+	@Override
+	public Integer clearCache(){
+		return queuedTaskHolderManager.clearCache();
+	}
 	}

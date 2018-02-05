@@ -45,5 +45,7 @@ public interface IQueuedTaskHolderManager {
 	void cancel(Long queuedTaskHolderId) throws ServiceException, SecurityServiceException;
 
 	void onTaskFinish(Long id);
+	
+	Integer clearCache();
 
 }

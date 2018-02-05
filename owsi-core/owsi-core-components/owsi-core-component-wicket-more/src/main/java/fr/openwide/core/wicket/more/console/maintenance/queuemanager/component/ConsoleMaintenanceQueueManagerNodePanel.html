@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
-<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
+<html
+	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
 <body>
 	<wicket:panel>
-		<wicket:message key="console.maintenance.queuemanager.actions.emptyCache.warning" />
-		<button wicket:id="emptyCache" class="btn btn-danger btn-xs">
-			<wicket:message key="console.maintenance.queuemanager.actions.emptyCache" />
-		</button>
-		<div wicket:id="nodes" class="row">
-			<div class="col-md-12">
-				<div wicket:id="node" class="panel panel-default" />
+			<h2>
+				<wicket:message
+					key="console.maintenance.queuemanager.actions.emptyCache" />
+			</h2>
+			<div class="alert  alert-danger">
+				<wicket:message
+					key="console.maintenance.queuemanager.actions.emptyCache.warning" />
 			</div>
-		</div>
+			<div class="actions">
+				<button wicket:id="emptyCache" class="btn btn-danger btn-xs">
+					<wicket:message
+						key="console.maintenance.queuemanager.actions.emptyCache" />
+				</button>
+			</div>
+			<div wicket:id="nodes" class="row">
+				<div class="col-md-12">
+					<div wicket:id="node" class="panel panel-default" />
+				</div>
+			</div>
 	</wicket:panel>
 
 	<wicket:fragment wicket:id="node">
@@ -25,13 +36,13 @@
 	</wicket:fragment>
 
 	<wicket:fragment wicket:id="nodeActions">
-		<a wicket:id="start" class="btn btn-success btn-xs">
-			<span class="fa fa-play" />
-			<wicket:message key="console.maintenance.queuemanager.actions.start" />
+		<a wicket:id="start" class="btn btn-success btn-xs"> <span
+			class="fa fa-play" /> <wicket:message
+				key="console.maintenance.queuemanager.actions.start" />
 		</a>
-		<a wicket:id="stop" class="btn btn-danger btn-xs">
-			<span class="fa fa-stop" />
-			<wicket:message key="console.maintenance.queuemanager.actions.stop" />
+		<a wicket:id="stop" class="btn btn-danger btn-xs"> <span
+			class="fa fa-stop" /> <wicket:message
+				key="console.maintenance.queuemanager.actions.stop" />
 		</a>
 	</wicket:fragment>
 

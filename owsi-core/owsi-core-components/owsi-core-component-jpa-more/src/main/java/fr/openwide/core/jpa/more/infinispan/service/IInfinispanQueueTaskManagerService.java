@@ -21,5 +21,7 @@ public interface IInfinispanQueueTaskManagerService {
 	SwitchStatusQueueTaskManagerResult startQueueManager(INode node);
 
 	SwitchStatusQueueTaskManagerResult stopQueueManager(INode node);
+	
+	Integer clearCache();
 
 }

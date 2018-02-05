@@ -14,6 +14,7 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.ResourceModel;
+import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +91,10 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 					
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						// TODO Auto-generated method stub
+						Integer nbTasksCleared = infinispanQueueTaskManagerService.clearCache();
+						getSession().success(new StringResourceModel("console.maintenance.queuemanager.actions.emptyCache.confirm")
+								.setParameters(nbTasksCleared).getObject());
+						FeedbackUtils.refreshFeedback(target, getPage());
 					}
 					
 				}.add(Condition.predicate(queueTaskManagerStatusModel, Predicates2.isTrue()).thenDisable())
