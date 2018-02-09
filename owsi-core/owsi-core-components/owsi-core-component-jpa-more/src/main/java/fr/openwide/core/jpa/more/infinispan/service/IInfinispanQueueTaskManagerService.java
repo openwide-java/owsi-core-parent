@@ -8,7 +8,7 @@ import fr.openwide.core.jpa.more.infinispan.model.QueueTaskManagerStatus;
 
 public interface IInfinispanQueueTaskManagerService {
 	
-	Boolean isOneQueueTaskManagerUp(List<INode> node);
+	Boolean isOneQueueTaskManagerUp();
 
 	QueueTaskManagerStatus getQueueTaskManagerStatus(INode node);
 

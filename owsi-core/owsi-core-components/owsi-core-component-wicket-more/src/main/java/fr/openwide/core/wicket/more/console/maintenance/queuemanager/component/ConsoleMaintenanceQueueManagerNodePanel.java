@@ -14,14 +14,12 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.ResourceModel;
-import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Functions;
 
-import fr.openwide.core.commons.util.functional.Predicates2;
 import fr.openwide.core.infinispan.model.INode;
 import fr.openwide.core.infinispan.service.IInfinispanClusterService;
 import fr.openwide.core.jpa.more.business.sort.ISort;
@@ -63,8 +61,6 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 
 	private final IModel<List<INode>> nodesModel;
 
-	private final IModel<Boolean> queueTaskManagerStatusModel;
-
 	public ConsoleMaintenanceQueueManagerNodePanel(String id) {
 		super(id);
 		setOutputMarkupId(true);
@@ -77,29 +73,6 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 			}
 		};
 		
-		queueTaskManagerStatusModel = new LoadableDetachableModel<Boolean>() {
-			private static final long serialVersionUID = 1L;
-			@Override
-			protected Boolean load() {
-				return infinispanQueueTaskManagerService.isOneQueueTaskManagerUp(nodesModel.getObject());
-			}
-		};
-		
-		add(
-				new AjaxLink<Void>("emptyCache") {
-					private static final long serialVersionUID = 1L;
-					
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						Integer nbTasksCleared = infinispanQueueTaskManagerService.clearCache();
-						getSession().success(new StringResourceModel("console.maintenance.queuemanager.actions.emptyCache.confirm")
-								.setParameters(nbTasksCleared).getObject());
-						FeedbackUtils.refreshFeedback(target, getPage());
-					}
-					
-				}.add(Condition.predicate(queueTaskManagerStatusModel, Predicates2.isTrue()).thenDisable())
-		);
-
 		add(
 				new CollectionView<INode>("nodes", nodesModel, Models.<INode>serializableModelFactory()) {
 					private static final long serialVersionUID = 1L;
@@ -353,7 +326,6 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 	protected void onDetach() {
 		super.onDetach();
 		Detachables.detach(nodesModel);
-		Detachables.detach(queueTaskManagerStatusModel);
 	}
 
 }

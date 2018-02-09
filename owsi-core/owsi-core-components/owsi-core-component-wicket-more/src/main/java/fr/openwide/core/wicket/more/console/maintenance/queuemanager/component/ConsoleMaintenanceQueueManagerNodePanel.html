@@ -4,25 +4,11 @@
 	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
 <body>
 	<wicket:panel>
-			<h2>
-				<wicket:message
-					key="console.maintenance.queuemanager.actions.emptyCache" />
-			</h2>
-			<div class="alert  alert-danger">
-				<wicket:message
-					key="console.maintenance.queuemanager.actions.emptyCache.warning" />
+		<div wicket:id="nodes" class="row">
+			<div class="col-md-12">
+				<div wicket:id="node" class="panel panel-default" />
 			</div>
-			<div class="actions">
-				<button wicket:id="emptyCache" class="btn btn-danger btn-xs">
-					<wicket:message
-						key="console.maintenance.queuemanager.actions.emptyCache" />
-				</button>
-			</div>
-			<div wicket:id="nodes" class="row">
-				<div class="col-md-12">
-					<div wicket:id="node" class="panel panel-default" />
-				</div>
-			</div>
+		</div>
 	</wicket:panel>
 
 	<wicket:fragment wicket:id="node">

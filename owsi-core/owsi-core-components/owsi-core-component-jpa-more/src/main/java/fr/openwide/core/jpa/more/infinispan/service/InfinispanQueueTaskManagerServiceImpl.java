@@ -136,8 +136,8 @@ public class InfinispanQueueTaskManagerServiceImpl implements IInfinispanQueueTa
 	}
 
 	@Override
-	public Boolean isOneQueueTaskManagerUp(List<INode> nodes) {
-		return nodes.stream().map(o -> getQueueTaskManagerStatus(o))
+	public Boolean isOneQueueTaskManagerUp() {
+		return infinispanClusterService.getNodes().stream().map(o -> getQueueTaskManagerStatus(o))
 				.filter(o-> o!=null)
 				.anyMatch(o->o.isQueueManagerActive());
 	}
