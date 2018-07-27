@@ -2,6 +2,7 @@ package fr.openwide.core.wicket.more.console.maintenance.queuemanager.page;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import fr.openwide.core.wicket.more.console.maintenance.queuemanager.component.ConsoleMaintenanceQueueManagerCacheInfinispanPanel;
 import fr.openwide.core.wicket.more.console.maintenance.queuemanager.component.ConsoleMaintenanceQueueManagerNodePanel;
 import fr.openwide.core.wicket.more.console.maintenance.template.ConsoleMaintenanceTemplate;
 import fr.openwide.core.wicket.more.console.template.ConsoleTemplate;
@@ -14,6 +15,7 @@ public class ConsoleMaintenanceQueueManagerPage extends ConsoleMaintenanceTempla
 		super(parameters);
 
 		add(
+				new ConsoleMaintenanceQueueManagerCacheInfinispanPanel("cacheInfinispan"),
 				new ConsoleMaintenanceQueueManagerNodePanel("nodes")
 		);
 	}

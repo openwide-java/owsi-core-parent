@@ -69,10 +69,10 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 			private static final long serialVersionUID = 1L;
 			@Override
 			protected List<INode> load() {
-				return infinispanClusterService.getAllNodes();
+				return infinispanClusterService.getNodes();
 			}
 		};
-
+		
 		add(
 				new CollectionView<INode>("nodes", nodesModel, Models.<INode>serializableModelFactory()) {
 					private static final long serialVersionUID = 1L;
@@ -225,7 +225,7 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 								} else {
 									Session.get().error(String.format("Erreur lors du démarrage du QueueTaskManager (%s)", result));
 								}
-								target.add(nodeFragment);
+								target.add(ConsoleMaintenanceQueueManagerNodePanel.this);
 							} catch (Exception e) {
 								LOGGER.error("Erreur lors du démarrage du QueueTaskManager", e);
 								Session.get().error(getString("common.error.unexpected"));
@@ -248,7 +248,7 @@ public class ConsoleMaintenanceQueueManagerNodePanel extends Panel {
 								} else {
 									Session.get().error(String.format("Erreur lors de l'arrêt du QueueTaskManager (%s)", result));
 								}
-								target.add(nodeFragment);
+								target.add(ConsoleMaintenanceQueueManagerNodePanel.this);
 							} catch (Exception e) {
 								LOGGER.error("Erreur lors de l'arrêt du QueueTaskManager", e);
 								Session.get().error(getString("common.error.unexpected"));

@@ -613,4 +613,22 @@ public class QueuedTaskHolderManagerImpl implements IQueuedTaskHolderManager, Ap
 		}
 		eventPublisher.publishEvent(new QueuedTaskFinishedEvent(taskId));
 	}
+
+	@Override
+	public Integer clearCache() {
+		Cache<Long, IAttribution> cache = getCache();
+		if (cache!=null) {
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("Beginning of cache cleaning");
+			Integer nbTasks = cache.keySet().size();			
+			cache.keySet().stream()
+				.forEach(o->cache.remove(o));
+			
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("End of cache cleaning");
+			return nbTasks;
+		}
+		return 0;
+		
+	}
 }

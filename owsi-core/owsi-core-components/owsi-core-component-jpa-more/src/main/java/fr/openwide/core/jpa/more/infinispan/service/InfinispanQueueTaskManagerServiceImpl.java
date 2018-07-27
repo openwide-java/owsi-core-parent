@@ -1,6 +1,7 @@
 package fr.openwide.core.jpa.more.infinispan.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -134,4 +135,14 @@ public class InfinispanQueueTaskManagerServiceImpl implements IInfinispanQueueTa
 		return SwitchStatusQueueTaskManagerResult.STOPPED;
 	}
 
-}
+	@Override
+	public Boolean isOneQueueTaskManagerUp() {
+		return infinispanClusterService.getNodes().stream().map(o -> getQueueTaskManagerStatus(o))
+				.filter(o-> o!=null)
+				.anyMatch(o->o.isQueueManagerActive());
+	}
+	@Override
+	public Integer clearCache(){
+		return queuedTaskHolderManager.clearCache();
+	}
+	}
