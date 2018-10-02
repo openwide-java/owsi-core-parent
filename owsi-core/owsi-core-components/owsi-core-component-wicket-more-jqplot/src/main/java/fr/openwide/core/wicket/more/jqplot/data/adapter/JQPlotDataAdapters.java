@@ -30,9 +30,12 @@ public final class JQPlotDataAdapters {
 	public static <S, K, V extends Number> IJQPlotDataAdapter<S, K, V> addPercentLabels(final IJQPlotDataAdapter<S, K, V> adapter, final Renderer<? super Double> percentRenderer) {
 		return new ForwardingJQPlotDataAdapter<S, K, V>(adapter) {	
 			private static final long serialVersionUID = 1L;
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			protected Collection<? extends AbstractSeries<?, V, ?>> transformOnGet(Collection<? extends AbstractSeries<?, V, ?>> delegateObject, Locale locale) {
-				return addPercentLabels(delegateObject, percentRenderer, locale);
+				// E should be an additional parameter of IJQPlotDataAdapter<S, K, V>
+				// see https://github.com/igloo-project/igloo-parent/commit/171f79b996456d0a0911315c7fd1741299426fe5
+				return addPercentLabels((Collection) delegateObject, percentRenderer, locale);
 			}
 			@Override
 			public void configure(PlotOptions options, Map<? extends S, PlotSeries> seriesMap,
