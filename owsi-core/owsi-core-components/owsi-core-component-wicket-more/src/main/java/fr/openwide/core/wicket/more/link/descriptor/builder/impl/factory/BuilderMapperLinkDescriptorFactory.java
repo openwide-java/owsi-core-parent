@@ -83,7 +83,8 @@ public final class BuilderMapperLinkDescriptorFactory<TTarget, TLinkDescriptor>
 		Collection<ILinkParameterMappingEntry> addedParameterMappingEntries = Lists.newArrayList();
 		Collection<ILinkParameterValidator> addedValidators = Lists.newArrayList();
 		
-		IModel<? extends TTarget> target = doCreate(targetFactory.getValue0(), parameters, targetFactory.getValue1());
+		IModel<? extends TTarget> target =
+				doCreate((IDetachableFactory<? extends Tuple, ? extends IModel<? extends TTarget>>) targetFactory.getValue0(), parameters, targetFactory.getValue1());
 		
 		for (Map.Entry<LinkParameterMappingEntryBuilder<?>, List<Integer>> entry : mappingEntryBuilders.entrySet()) {
 			List<Integer> indices = entry.getValue();
