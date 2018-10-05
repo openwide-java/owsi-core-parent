@@ -4,3 +4,8 @@ target2
 .project
 .settings
 .factorypath
+
+// InteliJ
+*.idea
+*.iml
+
