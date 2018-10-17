@@ -134,12 +134,7 @@ public abstract class GenericEntity<K extends Comparable<K> & Serializable, E ex
 
 	@Override
 	public int hashCode() {
-		int hash = 7;
-		
-		K id = getId();
-		hash = 31 * hash + ((id == null) ? 0 : id.hashCode());
-
-		return hash;
+		return super.hashCode(); // Just use the default Object implementation
 	}
 
 	@Override

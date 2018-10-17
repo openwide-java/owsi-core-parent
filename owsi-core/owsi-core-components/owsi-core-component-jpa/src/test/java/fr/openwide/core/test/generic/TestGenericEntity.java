@@ -17,22 +17,58 @@
 
 package fr.openwide.core.test.generic;
 
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.EntityManager;
+
+import org.hibernate.Session;
+import org.hibernate.proxy.HibernateProxy;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
+import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import com.google.common.base.Function;
+
+import fr.openwide.core.jpa.business.generic.model.GenericEntity;
 import fr.openwide.core.jpa.exception.SecurityServiceException;
 import fr.openwide.core.jpa.exception.ServiceException;
+import fr.openwide.core.jpa.util.EntityManagerUtils;
+import fr.openwide.core.jpa.util.HibernateUtils;
 import fr.openwide.core.test.AbstractJpaCoreTestCase;
 import fr.openwide.core.test.business.person.model.Person;
+import fr.openwide.core.test.business.person.model.PersonSubTypeA;
 import fr.openwide.core.test.business.person.service.IPersonService;
+import fr.openwide.core.test.business.project.model.Project;
 
 public class TestGenericEntity extends AbstractJpaCoreTestCase {
-
+	
 	@Autowired
 	protected IPersonService personService;
+	
+	@Autowired
+	protected EntityManagerUtils entityManagerUtils;
+
+	private TransactionTemplate writeTransactionTemplate;
+	
+	@Autowired
+	public void setPlatformTransactionManager(PlatformTransactionManager transactionManager) {
+		DefaultTransactionAttribute writeTransactionAttribute = new DefaultTransactionAttribute(TransactionAttribute.PROPAGATION_REQUIRES_NEW);
+		writeTransactionAttribute.setReadOnly(false);
+		writeTransactionTemplate = new TransactionTemplate(transactionManager, writeTransactionAttribute);
+	}
 
 	@Test
 	public void testGenericEntity() throws ServiceException, SecurityServiceException {
@@ -69,6 +105,151 @@ public class TestGenericEntity extends AbstractJpaCoreTestCase {
 		Assert.assertEquals("LastName FirstName", person.getNameForToString());
 	}
 	
+	@Test
+	public void testLimitedHashCodeAndEqualityConstraintsOnPerson() throws InterruptedException {
+		Person person = new Person("TestHashCode", "TestHashCode");
+		assertLimitedHashCodeAndEqualityConstraints(Person.class, person);
+	}
+
+	@Test
+	public void testLimitedHashCodeAndEqualityConstraintsOnPersonSubTypeA() throws InterruptedException {
+		PersonSubTypeA person = new PersonSubTypeA("TestHashCode", "TestHashCode", "TestHashCode");
+		assertLimitedHashCodeAndEqualityConstraints(PersonSubTypeA.class, person);
+	}
+	
+	@Test
+	public void testFullHashCodeAndEqualityConstraints() throws InterruptedException {
+		Person person = new Person("TestHashCode", "TestHashCode");
+		assertFullHashCodeAndEqualityConstraints(Person.class, person);
+	}
+	
+	/*
+	 * Adapted from https://vladmihalcea.com/2016/06/06/how-to-implement-equals-and-hashcode-using-the-entity-identifier/
+	 * with no constraint regarding detached entities or multiple persistence contexts.
+	 */
+	private <T extends Person> void assertLimitedHashCodeAndEqualityConstraints(
+			final Class<T> clazz, final T entity)
+			throws InterruptedException {
+		final Set<T> tuples = new HashSet<>();
+
+		assertFalse(tuples.contains(entity));
+		tuples.add(entity);
+		assertTrue(tuples.contains(entity));
+
+		final Long projectId = doInJPA(new Function<EntityManager, Long>() {
+			@Override
+			public Long apply(EntityManager entityManager) {
+				entityManager.persist(entity);
+				Project project = new Project("testHash");
+				project.setLeader(entity);
+				entityManager.persist(project);
+				entityManager.flush();
+				assertTrue("The entity is found after it's persisted", tuples.contains(entity));
+				return project.getId();
+			}
+		});
+		
+		doInJPA(new Function<EntityManager, Void>() {
+			@Override
+			public Void apply(EntityManager entityManager) {
+				Project project = entityManager.find(Project.class, projectId);
+				Person _entity = project.getLeader();
+				assertTrue("The entity is proxified (this is a prerequisite) for the next assert)",
+						_entity instanceof HibernateProxy);
+				final Set<Person> _tuples = new HashSet<>();
+				_tuples.add(HibernateUtils.unwrap(_entity));
+				assertTrue("The entity is found even if proxified", _tuples.contains(_entity));
+				return null;
+			}
+		});
+		
+		entityManagerReset();
+	}
+	
+	/*
+	 * Source: https://vladmihalcea.com/2016/06/06/how-to-implement-equals-and-hashcode-using-the-entity-identifier/
+	 */
+	private <T extends GenericEntity<?, ?>> void assertFullHashCodeAndEqualityConstraints(final Class<T> clazz, final T entity)
+			throws InterruptedException {
+		final Set<T> tuples = new HashSet<>();
+
+		assertFalse(tuples.contains(entity));
+		tuples.add(entity);
+		assertTrue(tuples.contains(entity));
+
+		doInJPA(new Function<EntityManager, Void>() {
+			@Override
+			public Void apply(EntityManager entityManager) {
+				entityManager.persist(entity);
+				entityManager.flush();
+				assertTrue("The entity is found after it's persisted", tuples.contains(entity));
+				return null;
+			}
+		});
+			
+
+		// The entity is found after the entity is detached
+		assertTrue(tuples.contains(entity));
+		doInJPA(new Function<EntityManager, Void>() {
+			@Override
+			public Void apply(EntityManager entityManager) {
+				T _entity = entityManager.merge(entity);
+				assertTrue("The entity is found after it's merged", tuples.contains(_entity));
+	
+				entityManager.unwrap(Session.class).update(entity);
+				assertTrue("The entity is found after it's reattached", tuples.contains(entity));
+				return null;
+			}
+		});
+
+		doInJPA(new Function<EntityManager, Void>() {
+			@Override
+			public Void apply(EntityManager entityManager) {
+				T _entity = entityManager.find(clazz, entity.getId());
+				assertTrue("The entity is found after it's loaded " + "in an other Persistence Context",
+						tuples.contains(_entity));
+				return null;
+			}
+		});
+
+		doASync(new Runnable() {
+			@Override
+			public void run() {
+				doInJPA(new Function<EntityManager, Void>() {
+					@Override
+					public Void apply(EntityManager entityManager) {
+						T _entity = entityManager.find(clazz, entity.getId());
+						assertTrue("The entity is found after it's loaded " + "in an other Persistence Context and "
+								+ "in an other thread", tuples.contains(_entity));
+						return null;
+					}
+				});
+			}
+		});
+		
+		entityManagerReset();
+	}
+	
+	private void doASync(Runnable runnable) throws InterruptedException {
+		Thread thread = new Thread(runnable);
+		thread.start();
+		thread.join();
+	}
+
+	private <T> T doInJPA(final Function<EntityManager, T> function) {
+		final EntityManager entityManager = entityManagerUtils.openEntityManager();
+		try {
+			return writeTransactionTemplate.execute(new TransactionCallback<T>() {
+				@Override
+				public T doInTransaction(TransactionStatus status) {
+					return function.apply(entityManager);
+				}
+			});
+		} finally {
+			entityManagerUtils.closeEntityManager();
+		}
+	}
+
 	@Before
 	@Override
 	public void init() throws ServiceException, SecurityServiceException {
